@@ -1,0 +1,11 @@
+image: ubuntu:20.04
+
+build:
+  stage: build
+  before_script:
+    - export DEBIAN_FRONTEND=noninteractive
+    - apt-get update
+    - apt-get install -y g++ libx11-dev libgl-dev libpng-dev
+  script:
+    # Very simple test just to see if the code compiles
+    - g++ -o balls code/*.cpp -lX11 -lGL -lpthread -lpng -lstdc++fs -std=c++17
