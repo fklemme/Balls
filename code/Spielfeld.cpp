@@ -9,22 +9,27 @@ Spielfeld::Spielfeld(int breite, int hoehe) : m_breite(breite), m_hoehe(hoehe) {
 }
 
 int Spielfeld::get_breite() const { return m_breite; }
+
 int Spielfeld::get_hoehe() const { return m_hoehe; }
 
 bool Spielfeld::Draw(int32_t x, int32_t y, olc::Pixel p) { return olc::PixelGameEngine::Draw(x + 1, y + 1, p); }
 
-// Called once at the start, so create things here
 bool Spielfeld::OnUserCreate() {
     // Balls anlegen
-    for (int i = 0; i < 50; ++i) {
-        Ball b(this, rand() % m_breite, rand() % m_hoehe);
+    for (int i = 0; i < 25; ++i) {
+        int position_x = rand() % m_breite;
+        int position_y = rand() % m_hoehe;
+        int richtung_x = (rand() % 3) - 1;  // Zahl zwischen -1 und 1.
+        int richtung_y = (rand() % 3) - 1;  // Zahl zwischen -1 und 1.
+        olc::Pixel farbe = olc::Pixel(rand() % 256, rand() % 256, rand() % 256);
+
+        Ball b(this, position_x, position_y, richtung_x, richtung_y, farbe);
         m_balls.push_back(b);
     }
 
     return true;
 }
 
-// Called once per frame, draws pixels
 bool Spielfeld::OnUserUpdate(float elapsed_seconds) {
     m_elapsed_seconds += elapsed_seconds;
 
