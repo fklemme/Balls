@@ -1,5 +1,8 @@
 #pragma once
 
+#include <deque>
+
+#include "Position.h"
 #include "olcPixelGameEngine.h"
 
 // Forward declaration
@@ -17,9 +20,9 @@ class Ball {
 
   private:
     Spielfeld* m_spielfeld;
-    int m_position_x;
-    int m_position_y;
+    Position m_position;
     int m_richtung_x;
     int m_richtung_y;
     olc::Pixel m_farbe;
+    std::deque<Position> m_spur;
 };

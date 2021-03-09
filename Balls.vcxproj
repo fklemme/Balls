@@ -21,11 +21,13 @@
   <ItemGroup>
     <ClCompile Include="code\Ball.cpp" />
     <ClCompile Include="code\main.cpp" />
+    <ClCompile Include="code\Position.cpp" />
     <ClCompile Include="code\Spielfeld.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="code\Ball.h" />
     <ClInclude Include="code\olcPixelGameEngine.h" />
+    <ClInclude Include="code\Position.h" />
     <ClInclude Include="code\Spielfeld.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
