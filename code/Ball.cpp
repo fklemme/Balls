@@ -12,25 +12,45 @@ Ball::Ball(Spielfeld* spielfeld, int position_x, int position_y, int richtung_x,
 void Ball::update() {
     // Aktuelle Position in "Spur" speichern
     m_spur.push_front(m_position);
-    if (m_spur.size() > 5) {
+    if (m_spur.size() > m_spurlaenge) {
         m_spur.pop_back();
     }
 
-    // Wenn m_richtung_x in die linke Wand führen würde, gehen stattdessen nach rechts.
-    if (m_position.x + m_richtung_x < 0) {
-        m_richtung_x = -m_richtung_x;  // Richtungswechsel (nach rechts)
-    } else if (m_position.x + m_richtung_x >= m_spielfeld->get_breite()) {
-        m_richtung_x = -m_richtung_x;  // Richtungswechsel (nach links)
-    }
-    m_position.x += m_richtung_x;
+    auto& hindernisse = m_spielfeld->get_hindernisse();
 
-    // Wenn m_richtung_y in die obere Wand führen würde, gehen stattdessen nach unten.
-    if (m_position.y + m_richtung_y < 0) {
-        m_richtung_y = -m_richtung_y;  // Richtungswechsel (nach unten)
-    } else if (m_position.y + m_richtung_y >= m_spielfeld->get_hoehe()) {
-        m_richtung_y = -m_richtung_y;  // Richtungswechsel (nach oben)
+    // Hinderniss "x" check und update
+    Position x_check = m_position;
+    x_check.x += m_richtung_x;
+
+    bool collision = false;
+    for (const Position& p : hindernisse) {
+        if (p.x == x_check.x && p.y == x_check.y) {
+            collision = true;
+            break;
+        }
     }
-    m_position.y += m_richtung_y;
+
+    if (collision) {
+        m_richtung_x = -m_richtung_x;  // Richtung umkehren
+    }
+    m_position.x += m_richtung_x;  // Position updaten
+
+    // Hinderniss "y" check und update
+    Position y_check = m_position;
+    y_check.y += m_richtung_y;
+
+    collision = false;
+    for (const Position& p : hindernisse) {
+        if (p.x == y_check.x && p.y == y_check.y) {
+            collision = true;
+            break;
+        }
+    }
+
+    if (collision) {
+        m_richtung_y = -m_richtung_y;  // Richtung umkehren
+    }
+    m_position.y += m_richtung_y;  // Position updaten
 }
 
 void Ball::draw() const {
@@ -40,7 +60,7 @@ void Ball::draw() const {
     // "Spur" zeichnen
     auto farbe = m_farbe;
     for (const Position& p : m_spur) {
-        farbe *= 0.9;  // reduziere auf 90%
+        farbe *= 0.9f;  // reduziere auf 90%
         m_spielfeld->Draw(p.x, p.y, farbe);
     }
 }

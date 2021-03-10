@@ -25,4 +25,5 @@ class Ball {
     int m_richtung_y;
     olc::Pixel m_farbe;
     std::deque<Position> m_spur;
+    int m_spurlaenge = 8;
 };
