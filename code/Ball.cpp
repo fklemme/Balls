@@ -1,5 +1,8 @@
 #include "Ball.h"
 
+#include <algorithm>
+#include <vector>
+
 #include "Spielfeld.h"
 
 Ball::Ball(Spielfeld* spielfeld, int position_x, int position_y, int richtung_x, int richtung_y, olc::Pixel farbe)
@@ -16,51 +19,65 @@ void Ball::update() {
         m_spur.pop_back();
     }
 
-    auto& hindernisse = m_spielfeld->get_hindernisse();
+    // Richtung checken und ggf. korregieren
+    if (m_richtung_x != 0 && m_richtung_y != 0) {
+        // Diagonale Bewegung
+        Position d(m_position.x + m_richtung_x, m_position.y + m_richtung_y);
+        if (m_spielfeld->check_kollision(d)) {
+            // Nur in diesem Fall Richtungskorrektur nötig
+            Position x(m_position.x + m_richtung_x, m_position.y);
+            const bool x_kollision = m_spielfeld->check_kollision(x);
+            Position y(m_position.x, m_position.y + m_richtung_y);
+            const bool y_kollision = m_spielfeld->check_kollision(y);
 
-    // Hinderniss "x" check und update
-    Position x_check = m_position;
-    x_check.x += m_richtung_x;
-
-    bool collision = false;
-    for (const Position& p : hindernisse) {
-        if (p.x == x_check.x && p.y == x_check.y) {
-            collision = true;
-            break;
+            if (x_kollision && !y_kollision) {
+                m_richtung_x = -m_richtung_x;  // x-Richtung umkehren
+            } else if (!x_kollision && y_kollision) {
+                m_richtung_y = -m_richtung_y;  // y-Richtung umkehren
+            } else {
+                m_richtung_x = -m_richtung_x;  // x-Richtung umkehren
+                m_richtung_y = -m_richtung_y;  // y-Richtung umkehren
+            }
+        }
+    } else {
+        // Horizontale/Vertikale Bewegung
+        if (m_richtung_x != 0) {
+            // Rechts/Links Bewegung
+            Position x(m_position.x + m_richtung_x, m_position.y);
+            if (m_spielfeld->check_kollision(x)) {
+                m_richtung_x = -m_richtung_x;  // x-Richtung umkehren
+            }
+        } else {
+            // Oben/Unten Bewegung
+            Position y(m_position.x, m_position.y + m_richtung_y);
+            if (m_spielfeld->check_kollision(y)) {
+                m_richtung_y = -m_richtung_y;  // y-Richtung umkehren
+            }
         }
     }
 
-    if (collision) {
-        m_richtung_x = -m_richtung_x;  // Richtung umkehren
-    }
-    m_position.x += m_richtung_x;  // Position updaten
-
-    // Hinderniss "y" check und update
-    Position y_check = m_position;
-    y_check.y += m_richtung_y;
-
-    collision = false;
-    for (const Position& p : hindernisse) {
-        if (p.x == y_check.x && p.y == y_check.y) {
-            collision = true;
-            break;
-        }
-    }
-
-    if (collision) {
-        m_richtung_y = -m_richtung_y;  // Richtung umkehren
-    }
-    m_position.y += m_richtung_y;  // Position updaten
+    // Position updaten
+    m_position.x += m_richtung_x;
+    m_position.y += m_richtung_y;
 }
 
 void Ball::draw() const {
-    // Aktuelle Position zeichnen
-    m_spielfeld->Draw(m_position.x, m_position.y, m_farbe);
+    std::vector<std::pair<Position, olc::Pixel>> schlange;
 
-    // "Spur" zeichnen
+    // Aktuelle Position in Schlange einfügen
+    schlange.emplace_back(m_position, m_farbe);
+
+    // "Spur" in Schlange einfügen
     auto farbe = m_farbe;
     for (const Position& p : m_spur) {
         farbe *= 0.9f;  // reduziere auf 90%
-        m_spielfeld->Draw(p.x, p.y, farbe);
+        schlange.emplace_back(p, farbe);
+    }
+
+    // "Schlange" rückwärts(!) zeichnen
+    // Damit übermalt der "Schwanz" nicht vordere Teile der "Schlange"
+    std::reverse(schlange.begin(), schlange.end());
+    for (auto& [position, farbe] : schlange) {
+        m_spielfeld->Draw(position.x, position.y, farbe);
     }
 }

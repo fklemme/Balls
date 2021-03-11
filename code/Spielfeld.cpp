@@ -14,6 +14,15 @@ int Spielfeld::get_hoehe() const { return m_hoehe; }
 
 const std::vector<Position>& Spielfeld::get_hindernisse() const { return m_hindernisse; }
 
+bool Spielfeld::check_kollision(const Position& p) const {
+    for (const Position& h : m_hindernisse) {
+        if (h.x == p.x && h.y == p.y) {
+            return true;  // Kollision gefunden
+        }
+    }
+    return false;  // keine Kollision gefunden
+}
+
 bool Spielfeld::Draw(int32_t x, int32_t y, olc::Pixel p) { return olc::PixelGameEngine::Draw(x + 1, y + 1, p); }
 
 bool Spielfeld::OnUserCreate() {
@@ -28,13 +37,13 @@ bool Spielfeld::OnUserCreate() {
     }
 
     // Hindernisse anlegen
-    for (int i = 10; i < 20; ++i) {
-        m_hindernisse.emplace_back(i, 10);  // von (10, 10) nach rechts
-        m_hindernisse.emplace_back(10, i);  // von (10, 10) nach unten
+    for (int i = 10; i <= 20; ++i) {
+        m_hindernisse.emplace_back(i, 10);  // von (10, 10) nach (20, 10)
+        m_hindernisse.emplace_back(10, i);  // von (10, 10) nach (10, 20)
     }
 
     // Balls anlegen
-    for (int i = 0; i < 10; ++i) {
+    for (int i = 0; i < m_startballs; ++i) {
         int position_x = rand() % m_breite;
         int position_y = rand() % m_hoehe;
 
@@ -50,6 +59,9 @@ bool Spielfeld::OnUserCreate() {
         Ball b(this, position_x, position_y, richtung_x, richtung_y, farbe);
         m_balls.push_back(b);
     }
+
+    // Debug Ball
+    // m_balls.emplace_back(this, 26, 15, -1, -1, olc::RED);
 
     return true;
 }
